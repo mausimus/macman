@@ -14,40 +14,6 @@
             INCLUDE      "hardware/dmabits.i"
             INCLUDE      "hardware/intbits.i"
 
-;----------------------------------------------------------------------------- vars
-            RSRESET
-screen:         rs.l        1
-copperList:     rs.l        1
-oldStack:       rs.l        1
-oldView:        rs.l        1
-oldIntena:      rs.w        1
-oldDma:         rs.w        1
-gfxBase:        rs.l        1
-tileData:       rs.l        1
-spriteData:     rs.l        1
-heroData:       rs.l        1
-fontData:       rs.l        1
-logoData:       rs.l        1
-copperSprites:  rs.l        1
-dead:           rs.w        1
-
-; objects (XYDF)
-hero:           rs.w        (OBJ_SIZE/2)
-ghosts:         rs.w        (NUM_SPRITES*OBJ_SIZE/2)
-
-; frame counter
-frameNo:       rs.w        1
-
-; score
-score:          rs.w       1
-highScore:      rs.w       1
-dotsEaten:       rs.w       1
-
-; pellet frames remaining
-pellet:         rs.w        1
-
-varsSize:      rs.b        0
-
 ;-----------------------------------------------------------------------------
 
 Program:
@@ -60,8 +26,6 @@ Quit:       bsr.w        EnableOs
 Exit:       bsr.w        CloseGraphicsLibrary
             move.l       vars+oldStack(pc),a7          ;restore old stack
             rts
-
-            jmp          Main
 
 ;-----------------------------------------------------------------------------
 ;
@@ -81,7 +45,7 @@ DoVariables:
 
               lea          vars(pc),a6
 
-	;set chip pointers
+  ;set chip pointers
             move.l       a0,screen(a6)
             add.l        #SCREEN_MEMSIZE,a0
             move.l       a0,copperList(a6)
@@ -101,7 +65,7 @@ DoVariables:
             lea          chipLogo,a0
             move.l       a0,logoData(a6)
 
-	;store old stack pointer
+  ;store old stack pointer
             lea          4(a7),a0
             move.l       a0,oldStack(a6)
 
@@ -115,22 +79,22 @@ DoVariables:
 ;a5	_custom
 ;
 DisableOs:
-	;save old view
+  ;save old view
             move.l       gfxBase(a6),a5
             move.l       $22(a5),oldView(a6)
             exg          a5,a6
 
-	;set no view 
+  ;set no view 
             sub.l        a1,a1
             bsr.b        LoadView
 
-	;takeover the blitter
+  ;takeover the blitter
             jsr          -456(a6)                    ;gfx OwnBlitter
             jsr          -228(a6)                    ;gfx WaitBlit
 
             move.l       a5,a6
 
-	;store hardware registers
+  ;store hardware registers
             lea          _custom,a5
             move.w       #$c000,d1
 
@@ -180,13 +144,13 @@ EnableOs:
 
             bsr.b        StopDmaAndIntsAtVBlank
 
-	;restore hardware regs
+  ;restore hardware regs
             move.w       oldIntena(a4),intena(a5)
             move.w       oldDma(a4),dmacon(a5)
 
             jsr          -462(a6)                    ;gfx DisownBlitter()
 
-	;load old view
+  ;load old view
             move.l       oldView(a4),a1
             bsr.b        LoadView
 
@@ -231,22 +195,3 @@ CloseGraphicsLibrary:
             ENDC
             jsr          -414(a6)                    ;exec CloseLibrary
 .exit       rts
-
-vars:       ds.b         varsSize
-
-    xdef screen
-    xdef copperList
-    xdef copperSprites
-    xdef tileData
-    xdef spriteData
-    xdef heroData
-    xdef fontData
-    xdef logoData
-    xdef hero
-    xdef ghosts
-    xdef frameNo
-    xdef score
-    xdef highScore
-    xdef dotsEaten
-    xdef pellet
-    xdef dead

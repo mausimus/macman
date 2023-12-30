@@ -22,7 +22,7 @@ MAP_COL_STEP		=	MAP_TILE_SIZE/8
 MAP_ROW_SIZE		=	SCREEN_WIDTH*2*SCREEN_BPL/(16/MAP_TILE_SIZE)
 MAP_ROW_STEP		=	MAP_ROW_SIZE-(MAP_W*MAP_COL_STEP)
 HERO_SIZE			=	16
-FONT_SIZE		    =	8
+FONT_SIZE			=	8
 SPRITE_SIZE			=	18*4
 
 SCREEN_MODULO		=	(SCREEN_BPL-1)*SCREEN_BROW
@@ -32,22 +32,70 @@ COPPER_MEMSIZE		=	(SCREEN_BPL*2+1)*4+(8*2*4)	; sprites
 CHIPDATA_MEMSIZE	=	SCREEN_MEMSIZE+COPPER_MEMSIZE
 
 NUM_SPRITES			=	4
-SPRITE_FRAMES       =   16
+SPRITE_FRAMES		=	16
 
-DEATH_TIME          =   50
-PELLET_TIME         =   (50*10)
-PELLET_ALERT         =  (50*2)
-GHOST_POINTS        =   200
-BASE_POINTS         =   10
-PELLET_POINTS       =   40
+DEATH_TIME			=	50
+PELLET_TIME			=	(50*10)
+PELLET_ALERT		=	(50*2)
+GHOST_POINTS		=	200
+BASE_POINTS			=	10
+PELLET_POINTS		=	40
 
 ; object struct offsets
 OBJ_X				=	0
 OBJ_Y				=	2
-OBJ_D				=	4 ; direction
-OBJ_F				=	6 ; frame no
-OBJ_S				=	8 ; state
+OBJ_D				=	4	; direction
+OBJ_F				=	6	; frame no
+OBJ_S				=	8	; state
 OBJ_SIZE			=	10
+
+;----------------------------------------------------------------------------- vars
+            RSRESET
+screen:         rs.l        1
+copperList:     rs.l        1
+oldStack:       rs.l        1
+oldView:        rs.l        1
+oldIntena:      rs.w        1
+oldDma:         rs.w        1
+gfxBase:        rs.l        1
+tileData:       rs.l        1
+spriteData:     rs.l        1
+heroData:       rs.l        1
+fontData:       rs.l        1
+logoData:       rs.l        1
+copperSprites:  rs.l        1
+dead:           rs.w        1
+
+; objects (XYDF)
+hero:           rs.w        (OBJ_SIZE/2)
+ghosts:         rs.w        (NUM_SPRITES*OBJ_SIZE/2)
+
+; frame counter
+frameNo:        rs.w        1
+
+; score
+score:          rs.w        1
+highScore:      rs.w        1
+dotsEaten:      rs.w        1
+
+; pellet frames remaining
+pellet:         rs.w        1
+
+varsSize:       rs.b        0
+
+;----------------------------------------------------------------------------- macros
+
+GET_HERO:       MACRO
+                move.l			a6,a0
+                add.l			#hero,a0
+                ENDM
+
+;-----------------------------------------------------------------------------
+
+GET_GHOSTS:     MACRO
+                move.l			a6,a0
+                add.l			#ghosts,a0
+                ENDM
 
 ;-----------------------------------------------------------------------------
 
@@ -68,17 +116,3 @@ WAIT_BLITTER:  MACRO
 .1\@           btst            #6,dmaconr(a5)
                bne             .1\@
                ENDM
-
-;-----------------------------------------------------------------------------
-
-GET_HERO:       MACRO
-                move.l			a6,a0
-                add.l			#hero,a0
-                ENDM
-
-;-----------------------------------------------------------------------------
-
-GET_GHOSTS:     MACRO
-                move.l			a6,a0
-                add.l			#ghosts,a0
-                ENDM
